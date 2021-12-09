@@ -112,52 +112,122 @@ namespace ProjectBack.Controllers
 
                 List<VehiculoResponse> data = new List<VehiculoResponse>();
 
-
-                //Validamos si ya existen registros con esta fecha
-                var regVehiculoExiste = Context.ConteoVehiculo.ToList().Where(p => p.Fecha == fecha);
-                if (regVehiculoExiste.Count() > 0)
+                if (fecha == "000")
                 {
-                    Response.Mensaje = "Ya existen registros con este filtro de fecha: " + fecha;
+                    int conteo=0;
+                    int suma = 0;
+                    string dia = "";
+                    int mes = 7;
+                    fecha = "2021-07-01";
+
+                    while (fecha != "2021-10-10")
+                    {
+
+                        //Validamos si ya existen registros con esta fecha
+                        var regVehiculoExiste = Context.ConteoVehiculo.ToList().Where(p => p.Fecha == fecha);
+                        if (regVehiculoExiste.Count() < 1)
+                        {
+                            //Consultamos api externa para obtener datos
+                            AppProxy proxyContext = new AppProxy();
+                            data = proxyContext.ConsultaVehiculos("ConteoVehiculos/", fecha);
+
+                            //Si existen datos con la fecha indicada se proceden a insertar
+                            if (data != null)
+                            {
+                                if (data.Count > 0)
+                                {
+                                    foreach (var item in data)
+                                    {
+                                        ConteoVehiculo vehiculo = new ConteoVehiculo();
+
+                                        vehiculo.estacion = item.estacion;
+                                        vehiculo.sentido = item.sentido;
+                                        vehiculo.hora = item.hora;
+                                        vehiculo.categoria = item.categoria;
+                                        vehiculo.cantidad = item.cantidad;
+                                        vehiculo.Fecha = fecha;
+
+                                        Context.ConteoVehiculo.Add(vehiculo);
+
+                                    }
+                                    Context.SaveChanges();
+                                    conteo += data.Count();
+                                    Response.Mensaje = "Operacion exitosa se insertaron los registros, cantidad insertada: " + conteo.ToString();
+                                }
+                            }
+                            if (conteo == 0)
+                            {
+                                Response.Mensaje = "No hay registros nuevos para insertar.";
+                            }
+                        }
+
+                        suma += 1;
+                        if (suma > 31)
+                        {
+                            suma = 1;
+                            mes += 1;
+                        }
+                        dia = suma.ToString();
+                        if (suma.ToString().Length < 2)
+                        {
+                            dia = "0" + suma.ToString();
+                        }
+                        fecha = "2021-"+mes.ToString() + "-" + dia;
+                        if (mes.ToString().Length < 2)
+                        {
+                            fecha = "2021-0" + mes.ToString() + "-" + dia;
+                        }
+
+                    }
                 }
                 else
                 {
-                    //Consultamos api externa para obtener datos
-                    AppProxy proxyContext = new AppProxy();
-                    data = proxyContext.ConsultaVehiculos("ConteoVehiculos/", fecha);
-
-                    //Si existen datos con la fecha indicada se proceden a insertar
-                    if (data != null)
+                    //Validamos si ya existen registros con esta fecha
+                    var regVehiculoExiste = Context.ConteoVehiculo.ToList().Where(p => p.Fecha == fecha);
+                    if (regVehiculoExiste.Count() > 0)
                     {
-                        if (data.Count > 0)
+                        Response.Mensaje = "Ya existen registros con este filtro de fecha: " + fecha;
+                    }
+                    else
+                    {
+                        //Consultamos api externa para obtener datos
+                        AppProxy proxyContext = new AppProxy();
+                        data = proxyContext.ConsultaVehiculos("ConteoVehiculos/", fecha);
+
+                        //Si existen datos con la fecha indicada se proceden a insertar
+                        if (data != null)
                         {
-                            foreach (var item in data)
+                            if (data.Count > 0)
                             {
-                                ConteoVehiculo vehiculo = new ConteoVehiculo();
+                                foreach (var item in data)
+                                {
+                                    ConteoVehiculo vehiculo = new ConteoVehiculo();
 
-                                vehiculo.estacion = item.estacion;
-                                vehiculo.sentido = item.sentido;
-                                vehiculo.hora = item.hora;
-                                vehiculo.categoria = item.categoria;
-                                vehiculo.cantidad = item.cantidad;
-                                vehiculo.Fecha = fecha;
+                                    vehiculo.estacion = item.estacion;
+                                    vehiculo.sentido = item.sentido;
+                                    vehiculo.hora = item.hora;
+                                    vehiculo.categoria = item.categoria;
+                                    vehiculo.cantidad = item.cantidad;
+                                    vehiculo.Fecha = fecha;
 
-                                Context.ConteoVehiculo.Add(vehiculo);
+                                    Context.ConteoVehiculo.Add(vehiculo);
 
+                                }
+                                Context.SaveChanges();
+                                Response.Mensaje = "Operacion exitosa se insertaron los registros, cantidad insertada: " + data.Count();
                             }
-                            Context.SaveChanges();
-                            Response.Mensaje = "Operacion exitosa se insertaron los registros, cantidad insertada: " + data.Count();
+                            else
+                            {
+                                Response.Mensaje = "No se encontraron registros con el filtro de fecha: " + fecha;
+                            }
                         }
                         else
                         {
                             Response.Mensaje = "No se encontraron registros con el filtro de fecha: " + fecha;
                         }
                     }
-                    else
-                    {
-                        Response.Mensaje = "No se encontraron registros con el filtro de fecha: " + fecha;
-                    }
-
                 }
+
 
                 return Ok(Response);
             }
@@ -257,48 +327,121 @@ namespace ProjectBack.Controllers
                 List<VehiculoResponse> data = new List<VehiculoResponse>();
 
 
-                //Validamos si ya existen registros con esta fecha
-                var regVehiculoExiste = Context.RecaudoVehiculo.ToList().Where(p => p.Fecha == fecha);
-                if (regVehiculoExiste.Count() > 0)
+                if (fecha == "000")
                 {
-                    Response.Mensaje = "Ya existen registros con este filtro de fecha: " + fecha;
+                    int conteo = 0;
+                    int suma = 0;
+                    string dia = "";
+                    int mes = 7;
+                    fecha = "2021-07-01";
+
+                    while (fecha != "2021-10-10")
+                    {
+
+                        //Validamos si ya existen registros con esta fecha
+                        var regVehiculoExiste = Context.RecaudoVehiculo.ToList().Where(p => p.Fecha == fecha);
+                        if (regVehiculoExiste.Count() < 1)
+                        {
+                            //Consultamos api externa para obtener datos
+                            AppProxy proxyContext = new AppProxy();
+                            data = proxyContext.ConsultaVehiculos("RecaudoVehiculos/", fecha);
+
+                            //Si existen datos con la fecha indicada se proceden a insertar
+                            if (data != null)
+                            {
+                                if (data.Count > 0)
+                                {
+                                    foreach (var item in data)
+                                    {
+                                        RecaudoVehiculo vehiculo = new RecaudoVehiculo();
+
+                                        vehiculo.estacion = item.estacion;
+                                        vehiculo.sentido = item.sentido;
+                                        vehiculo.hora = item.hora;
+                                        vehiculo.categoria = item.categoria;
+                                        vehiculo.valorTabulado = item.valorTabulado;
+                                        vehiculo.Fecha = fecha;
+
+                                        Context.RecaudoVehiculo.Add(vehiculo);
+
+                                    }
+                                    Context.SaveChanges();
+                                    conteo += data.Count();
+                                    Response.Mensaje = "Operacion exitosa se insertaron los registros, cantidad insertada: " + conteo.ToString();
+                                }
+                            }
+                            if (conteo == 0)
+                            {
+                                Response.Mensaje = "No hay registros nuevos para insertar.";
+                            }
+                        }
+
+                        suma += 1;
+                        if (suma > 31)
+                        {
+                            suma = 1;
+                            mes += 1;
+                        }
+                        dia = suma.ToString();
+                        if (suma.ToString().Length < 2)
+                        {
+                            dia = "0" + suma.ToString();
+                        }
+                        fecha = "2021-" + mes.ToString() + "-" + dia;
+                        if (mes.ToString().Length < 2)
+                        {
+                            fecha = "2021-0" + mes.ToString() + "-" + dia;
+                        }
+
+                    }
                 }
                 else
                 {
-                    //Consultamos api externa para obtener datos
-                    AppProxy proxyContext = new AppProxy();
-                    data = proxyContext.ConsultaVehiculos("RecaudoVehiculos/", fecha);
 
-                    //Si existen datos con la fecha indicada se proceden a insertar
-                    if (data != null)
+                    //Validamos si ya existen registros con esta fecha
+                    var regVehiculoExiste = Context.RecaudoVehiculo.ToList().Where(p => p.Fecha == fecha);
+                    if (regVehiculoExiste.Count() > 0)
                     {
-                        if (data.Count > 0)
+                        Response.Mensaje = "Ya existen registros con este filtro de fecha: " + fecha;
+                    }
+                    else
+                    {
+                        //Consultamos api externa para obtener datos
+                        AppProxy proxyContext = new AppProxy();
+                        data = proxyContext.ConsultaVehiculos("RecaudoVehiculos/", fecha);
+
+                        //Si existen datos con la fecha indicada se proceden a insertar
+                        if (data != null)
                         {
-                            foreach (var item in data)
+                            if (data.Count > 0)
                             {
-                                RecaudoVehiculo vehiculo = new RecaudoVehiculo();
+                                foreach (var item in data)
+                                {
+                                    RecaudoVehiculo vehiculo = new RecaudoVehiculo();
 
-                                vehiculo.estacion = item.estacion;
-                                vehiculo.sentido = item.sentido;
-                                vehiculo.hora = item.hora;
-                                vehiculo.categoria = item.categoria;
-                                vehiculo.valorTabulado = item.valorTabulado;
-                                vehiculo.Fecha = fecha;
+                                    vehiculo.estacion = item.estacion;
+                                    vehiculo.sentido = item.sentido;
+                                    vehiculo.hora = item.hora;
+                                    vehiculo.categoria = item.categoria;
+                                    vehiculo.valorTabulado = item.valorTabulado;
+                                    vehiculo.Fecha = fecha;
 
-                                Context.RecaudoVehiculo.Add(vehiculo);
+                                    Context.RecaudoVehiculo.Add(vehiculo);
 
+                                }
+                                Context.SaveChanges();
+                                Response.Mensaje = "Operacion exitosa se insertaron los registros, cantidad insertada: " + data.Count();
                             }
-                            Context.SaveChanges();
-                            Response.Mensaje = "Operacion exitosa se insertaron los registros, cantidad insertada: " + data.Count();
+                            else
+                            {
+                                Response.Mensaje = "No se encontraron registros con el filtro de fecha: " + fecha;
+                            }
                         }
                         else
                         {
                             Response.Mensaje = "No se encontraron registros con el filtro de fecha: " + fecha;
                         }
-                    }
-                    else
-                    {
-                        Response.Mensaje = "No se encontraron registros con el filtro de fecha: " + fecha;
+
                     }
 
                 }
